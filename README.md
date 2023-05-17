@@ -16,3 +16,33 @@ Here are some of the advantages of hosting site on S3
 ## Features
 
 * Fully automated
+
+**Let’s get in to the code:**
+
+**Created Datasources.tf**
+
+Fetches information about the Route 53 DNS zone named "ashna.online" and stores it in the aws_route53_zone.myzone data object. This can be used later to create DNS records or retrieve zone properties
+
+```
+data "aws_route53_zone" "myzone" {
+  name         = "ashna.online"
+  private_zone = false
+}
+```
+Later I created a policy document as above, This block creates an IAM policy document that allows these actions on S3 bucket. Once you have this policy document, you can associate it with an IAM policy resource or an S3 bucket resource in your Terraform configuration to grant the specified permissions
+
+```
+data "aws_iam_policy_document" "bucket_policy" {
+  statement {
+    actions = [
+      "s3:ListBucket",
+      "s3:GetObject",
+      "s3:PutObject"
+    ]
+    resources = [
+      "arn:aws:s3:::webserver.ashna.online",
+      "arn:aws:s3:::webserver.ashna.online/*"
+    ]
+  }
+}
+```
