@@ -1,0 +1,72 @@
+##---------------creating bucket to configure website-----------##
+
+resource "aws_s3_bucket" "my_bucket" {
+  bucket = "webserver.ashna.online"
+
+  website {
+    index_document = "index.html"
+  }
+}
+
+##--------------locals to map file extensions--------------##
+
+locals {
+  mime_types = {
+    "css"  = "text/css"
+    "html" = "text/html"
+    "ico"  = "image/vnd.microsoft.icon"
+    "js"   = "application/javascript"
+    "json" = "application/json"
+    "map"  = "application/json"
+    "png"  = "image/png"
+    "svg"  = "image/svg+xml"
+    "txt"  = "text/plain"
+    "jpg"  = "image/jpeg"
+    "ttf"  = "application/font"
+   "woff"  = "application/font"
+   "woff2" = "application/octet-stream"
+  "eot"    = "application/octet-stream"
+  }
+}
+
+##---------------to pload website contents-------------##
+
+resource "aws_s3_object" "object" {
+  bucket = aws_s3_bucket.my_bucket.bucket
+
+  for_each = fileset("/home/ec2-user/website", "**/*.*")
+
+  key          = each.key
+  source       = "/home/ec2-user/website/${each.key}"
+  content_type = lookup(tomap(local.mime_types), element(split(".", each.key), length(split(".", each.key)) - 1))
+}
+
+
+##----------------to attach policy to bucket-----------------##
+
+resource "aws_s3_bucket_policy" "policy" {
+  bucket = aws_s3_bucket.my_bucket.id
+  policy = data.aws_iam_policy_document.bucket_policy.json
+
+}
+
+##-----------allowing public access to the bucket and its objects------------##
+
+resource "aws_s3_bucket_public_access_block" "bucket" {
+  bucket = aws_s3_bucket.my_bucket.id
+
+  block_public_acls       = false
+  block_public_policy     = false
+  ignore_public_acls      = false
+  restrict_public_buckets = false
+}
+
+##----------------pointing bucket's endpoint to domain name------------##
+
+resource "aws_route53_record" "webserver" {
+  zone_id = data.aws_route53_zone.myzone.zone_id
+  name    = "webserver"
+  type    = "CNAME"
+  ttl     = 300
+  records = [data.aws_s3_bucket.bucket_url.website_endpoint]
+}
