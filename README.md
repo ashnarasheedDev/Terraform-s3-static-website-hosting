@@ -109,3 +109,33 @@ resource "aws_s3_object" "object" {
   source       = "/home/ec2-user/website/${each.key}"
   content_type = lookup(tomap(local.mime_types), element(split(".", each.key), length(split(".", each.key)) - 1))
 ```
+
+> Allowing public_access to the bucket
+
+All the block_public_* attributes are set to false, allowing public access to the bucket and its objects.
+
+```
+resource "aws_s3_bucket_public_access_block" "bucket" {
+  bucket = aws_s3_bucket.my_bucket.id
+ 
+  block_public_acls       = false
+  block_public_policy     = false
+  ignore_public_acls      = false
+  restrict_public_buckets = false
+}
+```
+
+> Created a Route 53 record for the specified S3 bucket
+
+The records attribute specifies the value(s) of the record. In this case, it references the website endpoint URL of the S3 bucket, obtained from the data.aws_s3_bucket.bucket_url.website_endpoint data source
+
+```
+resource "aws_route53_record" "frontend" {
+  zone_id = data.aws_route53_zone.myzone.zone_id
+  name    = "webserver"
+  type    = "CNAME"
+  ttl     = 300
+  records = [data.aws_s3_bucket.bucket_url.website_endpoint]
+}
+```
+
