@@ -1,0 +1,5 @@
+##---------To print the website URL----------##
+
+output "website_url" {
+  value = data.aws_s3_bucket.bucket_url.website_endpoint
+}
