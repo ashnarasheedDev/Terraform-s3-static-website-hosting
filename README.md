@@ -61,6 +61,18 @@ resource "aws_s3_bucket" "my_bucket" {
    }
 }
 ```
+> Attaching created policy to bucket
+
+The policy parameter is set to the JSON content of the bucket_policy.json file, which is to be defined using the data.aws_iam_policy_document data source. This data source allows you to define an IAM policy document separately and reference it in your resource configurations.
+
+```
+resource "aws_s3_bucket_policy" "policy" {
+  bucket = aws_s3_bucket.my_bucket.id
+  policy = data.aws_iam_policy_document.bucket_policy.json
+
+}
+```
+
 > Creating Locals to map file extensions with their corresponding MIME types
 
 In this code, the mime_types variable is a map that associates file extensions (e.g., "css", "html", "js") with their corresponding MIME types (e.g., "text/css", "text/html", "application/javascript"). The file extensions are used later to determine the content type of each uploaded file.
