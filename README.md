@@ -46,6 +46,7 @@ data "aws_iam_policy_document" "bucket_policy" {
   }
 }
 ```
+
 **Resource code definition**
 
 > creating bucket
@@ -83,4 +84,28 @@ locals {
     "eot" = "application/octet-stream"
   }
 }
+```
+> Uploading website contents to s3 from my local machine
+
+The objects are uploaded based on the files present in the local directory "/home/ec2-user/website.
+
+The for_each attribute uses the fileset function to iterate over each file in the "/home/ec2-user/website" directory matching the pattern  The objects are uploaded based on the files present in the local directory "/home/ec2-user/website.
+
+The for_each attribute uses the fileset function to iterate over each file in the "/home/ec2-user/website" directory matching the pattern "**/.". This pattern matches all files with an extension.
+
+	key: The key of the S3 object. It is set to the relative path of the file within the "/home/ec2-user/website" directory.
+
+	source: The local path of the file to be uploaded.
+
+	content_type: The MIME type of the file, determined using the lookup function. It looks up the MIME type from the local.mime_types map based on the file extension.
+
+By executing this Terraform configuration, the files in the "/home/ec2-user/website" directory will be uploaded to the specified S3 bucket with their respective keys and content types.
+
+```
+resource "aws_s3_object" "object" {
+  bucket = aws_s3_bucket.my_bucket.bucket 
+  for_each = fileset("/home/ec2-user/website", "**/*.*") 
+  key          = each.key
+  source       = "/home/ec2-user/website/${each.key}"
+  content_type = lookup(tomap(local.mime_types), element(split(".", each.key), length(split(".", each.key)) - 1))
 ```
