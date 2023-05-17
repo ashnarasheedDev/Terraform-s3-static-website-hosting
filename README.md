@@ -48,7 +48,9 @@ data "aws_iam_policy_document" "bucket_policy" {
 ```
 **Resource code definition**
 
-> creating bucket. Bucket name must be same as website name you are going to set up.
+> creating bucket
+
+The bucket name and website name should be same. The website block is used to configure the bucket for website hosting. In this case, the  index_document attribute is set to "index.html", which specifies that the "index.html" file should be served as the default document for the website
 
 ```
 resource "aws_s3_bucket" "my_bucket" {
@@ -56,5 +58,29 @@ resource "aws_s3_bucket" "my_bucket" {
   website {
     index_document = "index.html"
    }
+}
+```
+> Creating Locals to map file extensions with their corresponding MIME types
+
+In this code, the mime_types variable is a map that associates file extensions (e.g., "css", "html", "js") with their corresponding MIME types (e.g., "text/css", "text/html", "application/javascript"). The file extensions are used later to determine the content type of each uploaded file.
+
+```
+locals {
+  mime_types = {
+    "css"  = "text/css"
+    "html" = "text/html"
+    "ico"  = "image/vnd.microsoft.icon"
+    "js"   = "application/javascript"
+    "json" = "application/json"
+    "map"  = "application/json"
+    "png"  = "image/png"
+    "svg"  = "image/svg+xml"
+    "txt"  = "text/plain"
+    "jpg"  = "image/jpeg"
+    "ttf"  = "application/font"
+    "woff" = "application/font"
+    "woff2" = "application/octet-stream"
+    "eot" = "application/octet-stream"
+  }
 }
 ```
