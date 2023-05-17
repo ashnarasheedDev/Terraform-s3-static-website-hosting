@@ -29,7 +29,7 @@ data "aws_route53_zone" "myzone" {
   private_zone = false
 }
 ```
-Later I created a policy document as above, This block creates an IAM policy document that allows these actions on S3 bucket. Once you have this policy document, you can associate it with an IAM policy resource or an S3 bucket resource in your Terraform configuration to grant the specified permissions
+Later I created a policy document. This block creates an IAM policy document that allows these actions on S3 bucket. Once you have this policy document, you can associate it with an IAM policy resource or an S3 bucket resource in your Terraform configuration to grant the specified permissions
 
 ```
 data "aws_iam_policy_document" "bucket_policy" {
@@ -44,5 +44,17 @@ data "aws_iam_policy_document" "bucket_policy" {
       "arn:aws:s3:::webserver.ashna.online/*"
     ]
   }
+}
+```
+**Resource code definition**
+
+> creating bucket. Bucket name must be same as website name you are going to set up.
+
+```
+resource "aws_s3_bucket" "my_bucket" {
+  bucket = "webserver.ashna.online"
+  website {
+    index_document = "index.html"
+   }
 }
 ```
